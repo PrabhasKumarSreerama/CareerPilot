@@ -1,0 +1,163 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    font-family: "Inter", sans-serif;
+    background: linear-gradient(
+        135deg,
+        #0f172a 0%,
+        #111827 45%,
+        #1e293b 100%
+    );
+    color: var(--text-primary);
+    overflow-x: hidden;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+li {
+    list-style: none;
+}
+
+button,
+input {
+    font-family: inherit;
+}
+
+:root {
+    /* Text */
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+
+    /* Backgrounds */
+    --bg-primary: rgba(15, 23, 42, 0.85);
+    --bg-secondary: rgba(30, 41, 59, 0.8);
+    --bg-card: rgba(255, 255, 255, 0.05);
+
+    /* Brand */
+    --accent: #6366f1;
+    --accent-hover: #4f46e5;
+
+    /* Borders & Shadows */
+    --border: rgba(255, 255, 255, 0.08);
+    --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+
+    /* Radius */
+    --radius: 16px;
+}
+
+.navbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    padding: 1rem 6%;
+    height: 72px;
+
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.logo {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: white;
+    letter-spacing: 0.5px;
+}
+
+.logo span {
+    color: var(--accent);
+}
+
+.nav-links {
+    display: flex;
+    gap: 2rem;
+}
+
+.nav-links a {
+    color: var(--text-secondary);
+    font-weight: 500;
+    transition: 0.3s ease;
+    position: relative;
+}
+
+.nav-links a:hover {
+    color: white;
+}
+
+.nav-links a::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    bottom: -6px;
+    width: 0%;
+    height: 2px;
+    background: var(--accent);
+    transition: 0.3s;
+}
+
+.nav-links a:hover::after {
+    width: 100%;
+}
+
+.nav-actions {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.login-btn {
+    color: white;
+    transition: 0.3s;
+}
+
+.login-btn:hover {
+    color: var(--accent);
+}
+
+.signup-btn {
+    background: var(--accent);
+    color: white;
+    padding: 0.75rem 1.4rem;
+    border-radius: 10px;
+    font-weight: 600;
+    transition: 0.3s ease;
+    box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+}
+
+.signup-btn:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(99, 102, 241, 0.45);
+}
+
+body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+        radial-gradient(circle at top left, rgba(99,102,241,.15), transparent 35%),
+        radial-gradient(circle at bottom right, rgba(56,189,248,.12), transparent 35%);
+    pointer-events: none;
+    z-index: -1;
+}
