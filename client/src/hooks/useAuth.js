@@ -1,7 +1,7 @@
 import { useContext } from "react";
 import { AuthContext } from "../context/auth.context";
 import { useEffect } from "react";
-import { signup, signin, signout, getCurrentUser } from "../services/auth.api.js";
+import { signup, signin, signout, getCurrentUser, forgotPassword, verifyOtp, resetPassword } from "../services/auth.api.js";
 
 export const useAuth = () => {
     const context = useContext(AuthContext);
@@ -46,11 +46,11 @@ export const useAuth = () => {
     };
 
     // Sign in an existing user
-    const handleSignin = async (email, password) => {
+    const handleSignin = async (email, password, rememberMe) => {
         setError(null);
         setLoading(true);
         try {
-            const response = await signin(email, password);
+            const response = await signin(email, password, rememberMe);
             setUser(response.user);
             return { success: true, user: response.user };
         } catch (err) {
@@ -76,6 +76,55 @@ export const useAuth = () => {
             setLoading(false);
         }
     };
+
+    // Request reset password OTP
+    const handleForgotPassword = async (email) => {
+        setError(null);
+        setLoading(true);
+        try {
+            const response = await forgotPassword(email);
+            return { success: true, message: response.message, otp: response.otp };
+        } catch (err) {
+            const msg = err.response?.data?.message || err.message;
+            setError(msg);
+            return { success: false, error: msg };
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Verify OTP
+    const handleVerifyOtp = async (email, otp) => {
+        setError(null);
+        setLoading(true);
+        try {
+            const response = await verifyOtp(email, otp);
+            return { success: true, message: response.message };
+        } catch (err) {
+            const msg = err.response?.data?.message || err.message;
+            setError(msg);
+            return { success: false, error: msg };
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Reset password with verified OTP
+    const handleResetPassword = async (email, otp, newPassword) => {
+        setError(null);
+        setLoading(true);
+        try {
+            const response = await resetPassword(email, otp, newPassword);
+            return { success: true, message: response.message };
+        } catch (err) {
+            const msg = err.response?.data?.message || err.message;
+            setError(msg);
+            return { success: false, error: msg };
+        } finally {
+            setLoading(false);
+        }
+    };
+
     return {
         user,
         loading,
@@ -83,6 +132,9 @@ export const useAuth = () => {
         handleSignup,
         handleSignin,
         handleSignout,
+        handleForgotPassword,
+        handleVerifyOtp,
+        handleResetPassword,
         checkAuthStatus
     };
 };

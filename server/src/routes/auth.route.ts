@@ -1,5 +1,13 @@
 import { Router } from "express";
-import { handleSignin, handleSignout, handleSignup, handleMyDetails } from "../handlers/auth.handler";
+import { 
+    handleSignin, 
+    handleSignout, 
+    handleSignup, 
+    handleMyDetails,
+    handleForgotPassword,
+    handleVerifyOtp,
+    handleResetPassword
+} from "../handlers/auth.handler";
 import { authUser } from "../middlewares/auth.middleware";
 
 const authRouter = Router()
@@ -19,6 +27,20 @@ authRouter.post('/signin', handleSignin)
  */
 authRouter.get('/signout', handleSignout)
 
+/**
+ * POST /auth/forgot-password
+ */
+authRouter.post('/forgot-password', handleForgotPassword)
+
+/**
+ * POST /auth/verify-otp
+ */
+authRouter.post('/verify-otp', handleVerifyOtp)
+
+/**
+ * POST /auth/reset-password
+ */
+authRouter.post('/reset-password', handleResetPassword)
 
 /**
  * GET /my-details

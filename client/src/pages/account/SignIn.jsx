@@ -9,6 +9,7 @@ const SignIn = () => {
     const [showPassword, setShowPassword] = useState(false);
     const [formError, setFormError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const [rememberMe, setRememberMe] = useState(false);
 
     const { user, handleSignin, loading: authLoading } = useAuth();
     const navigate = useNavigate();
@@ -37,7 +38,7 @@ const SignIn = () => {
         }
 
         setIsSubmitting(true);
-        const result = await handleSignin(email.trim(), password);
+        const result = await handleSignin(email.trim(), password, rememberMe);
         setIsSubmitting(false);
 
         if (!result.success) {
@@ -190,12 +191,16 @@ const SignIn = () => {
 
                         <div className="form-actions">
                             <label className="remember-me">
-                                <input type="checkbox" />
+                                <input 
+                                    type="checkbox" 
+                                    checked={rememberMe}
+                                    onChange={(e) => setRememberMe(e.target.checked)}
+                                />
                                 <span>Remember me</span>
                             </label>
-                            <a href="#forgot" className="forgot-password" onClick={(e) => e.preventDefault()}>
+                            <Link to="/forgot-password" className="forgot-password">
                                 Forgot password?
-                            </a>
+                            </Link>
                         </div>
 
                         <button type="submit" className="auth-btn" disabled={isSubmitting}>

@@ -47,7 +47,7 @@ const handleSignup = async (req: Request, res: Response) => {
 const handleSignin = async (req: Request, res: Response) => {
 
     try {
-        const {email, password} = req.body;
+        const {email, password, rememberMe} = req.body;
 
         if(!email || !password){
             return res.status(400).json({message: 'Email and password are required'})
@@ -63,9 +63,12 @@ const handleSignin = async (req: Request, res: Response) => {
             return res.status(401).json({message: 'Password is not valid'})
         }
 
-        const loginToken = jwt.sign({_id: user._id, name: user.name, email: user.email}, process.env.JWT_SECRET! , {expiresIn: '1d'})
+        const expiresIn = rememberMe ? '30d' : '1d';
+        const maxAge = rememberMe ? 30 * 24 * 60 * 60 * 1000 : 1 * 24 * 60 * 60 * 1000;
 
-        res.cookie('token', loginToken, { httpOnly: true, maxAge: 1 * 24 * 60 * 60 * 1000})
+        const loginToken = jwt.sign({_id: user._id, name: user.name, email: user.email}, process.env.JWT_SECRET! , {expiresIn})
+
+        res.cookie('token', loginToken, { httpOnly: true, maxAge})
 
         return res.status(200).json({message: 'User logged in successfully', user: {
             _id: user._id,
@@ -124,5 +127,112 @@ const handleMyDetails = async (req: Request, res: Response) => {
         return res.status(500).json({ message: 'Internal server error' });
     }
 }
+
+const handleForgotPassword = async (req: Request, res: Response) => {
+    try {
+        const { email } = req.body;
+        if (!email) {
+            return res.status(400).json({ message: 'Email is required' });
+        }
+
+        const user = await UserModel.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Generate 6 digit random number
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        // Expiry in 10 minutes
+        const otpExpires = new Date(Date.now() + 10 * 60 * 1000);
+
+        user.resetOtp = otp;
+        user.resetOtpExpires = otpExpires;
+        await user.save();
+
+        // Print to console for development testing
+        console.log(`[DEVELOPMENT] Password Reset OTP for ${email}: ${otp}`);
+
+        return res.status(200).json({ 
+            success: true, 
+            message: 'Verification code sent successfully',
+            otp: otp 
+        });
+    } catch (error) {
+        console.error('Error in forgot-password handler:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+const handleVerifyOtp = async (req: Request, res: Response) => {
+    try {
+        const { email, otp } = req.body;
+        if (!email || !otp) {
+            return res.status(400).json({ message: 'Email and verification code are required' });
+        }
+
+        const user = await UserModel.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        if (!user.resetOtp || user.resetOtp !== otp) {
+            return res.status(400).json({ message: 'Invalid verification code' });
+        }
+
+        if (user.resetOtpExpires && new Date() > user.resetOtpExpires) {
+            return res.status(400).json({ message: 'Verification code has expired' });
+        }
+
+        return res.status(200).json({ success: true, message: 'Verification code verified successfully' });
+    } catch (error) {
+        console.error('Error in verify-otp handler:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+const handleResetPassword = async (req: Request, res: Response) => {
+    try {
+        const { email, otp, newPassword } = req.body;
+        if (!email || !otp || !newPassword) {
+            return res.status(400).json({ message: 'Email, verification code, and new password are required' });
+        }
+
+        const user = await UserModel.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        if (!user.resetOtp || user.resetOtp !== otp) {
+            return res.status(400).json({ message: 'Invalid verification code' });
+        }
+
+        if (user.resetOtpExpires && new Date() > user.resetOtpExpires) {
+            return res.status(400).json({ message: 'Verification code has expired' });
+        }
+
+        // Hash new password
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        user.password = hashedPassword;
+        
+        // Clear OTP fields
+        user.resetOtp = null as any;
+        user.resetOtpExpires = null as any;
+        await user.save();
+
+        return res.status(200).json({ success: true, message: 'Password reset successfully' });
+    } catch (error) {
+        console.error('Error in reset-password handler:', error);
+        return res.status(500).json({ message: 'Internal server error' });
+    }
+};
  
-export { handleSignup, handleSignin, handleSignout, handleMyDetails }
+export { 
+    handleSignup, 
+    handleSignin, 
+    handleSignout, 
+    handleMyDetails,
+    handleForgotPassword,
+    handleVerifyOtp,
+    handleResetPassword
+}
