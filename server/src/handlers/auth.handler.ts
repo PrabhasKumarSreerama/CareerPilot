@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import UserModel from "../models/user.model";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import BlocklistTokenModel from "../models/blocklistoken.model";
+import BlacklistTokenModel from "../models/blacklistoken.model";
 
 // POST /api/auth/signup for registering a user
 const handleSignup = async (req: Request, res: Response) => {
@@ -95,7 +95,7 @@ const handleSignout = async (req: Request, res: Response) => {
             return res.status(401).json({message: 'Invalid token'})
         }
 
-        await BlocklistTokenModel.create({token})
+        await BlacklistTokenModel.create({token})
         res.clearCookie('token')
         return res.status(200).json({message: 'User logged out successfully'})
     } catch (error) {
